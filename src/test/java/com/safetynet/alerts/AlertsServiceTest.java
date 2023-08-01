@@ -34,6 +34,7 @@ import com.safetynet.alerts.model.Flood;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.model.PersonFlood;
+import com.safetynet.alerts.model.PersonInfo;
 import com.safetynet.alerts.model.PhoneAlert;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
@@ -347,4 +348,35 @@ public class AlertsServiceTest {
 		verify(medicalRecordRepository, times(2)).getMedicalRecordByFullName(anyString(), anyString());
 	}
 	
+	@Test
+	public void testGetPersonInfo() {
+
+		Person person = new Person("John", "Boyd", "1509 Culver St", "Culver", "97451", "841-874-6512",
+				"jaboyd@email.com");
+		MedicalRecord medicalRecord = new MedicalRecord("John", "Boyd", "03/06/1984", new ArrayList<>(),
+				new ArrayList<>());
+		List<Person> persons = new ArrayList<>();
+		persons.add(person);
+
+		when(personRepository.getAllPersons()).thenReturn(persons);
+		when(medicalRecordRepository.getMedicalRecordByFullName("John", "Boyd")).thenReturn(medicalRecord);
+
+		List<PersonInfo> personInfos = alertsService.getPersonInfo("John", "Boyd");
+
+		assertThat(personInfos.size()).isEqualTo(1);
+
+		PersonInfo personInfo = personInfos.get(0);
+
+		assertThat(personInfo.getInfoPerson().getFirstName()).isEqualTo("John");
+		assertThat(personInfo.getInfoPerson().getLastName()).isEqualTo("Boyd");
+		assertThat(personInfo.getInfoPerson().getAddress()).isEqualTo("1509 Culver St");
+		assertThat(personInfo.getInfoPerson().getEmail()).isEqualTo("jaboyd@email.com");
+		assertThat(personInfo.getAge()).isEqualTo(39);
+		assertThat(personInfo.getMedications().size()).isEqualTo(0);
+		assertThat(personInfo.getAllergies().size()).isEqualTo(0);
+
+		verify(personRepository, times(1)).getAllPersons();
+		verify(medicalRecordRepository, times(1)).getMedicalRecordByFullName("John", "Boyd");
+	}
+
 }

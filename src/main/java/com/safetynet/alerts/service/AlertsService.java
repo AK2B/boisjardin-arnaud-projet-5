@@ -17,11 +17,13 @@ import com.safetynet.alerts.model.Fire;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
 import com.safetynet.alerts.model.Flood;
+import com.safetynet.alerts.model.InfoPerson;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.model.PersonCoverage;
 import com.safetynet.alerts.model.PersonFire;
 import com.safetynet.alerts.model.PersonFlood;
+import com.safetynet.alerts.model.PersonInfo;
 import com.safetynet.alerts.model.PhoneAlert;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
@@ -326,6 +328,55 @@ public class AlertsService {
 		}
 
 		return age;
+	}
+
+	/**
+	 * Cette méthode retourne les informations sur les personnes correspondant au
+	 * prénom et au nom spécifiés.
+	 *
+	 * @param firstName le prénom de la personne
+	 * @param lastName  le nom de la personne
+	 * @return une liste d'objets PersonInfo contenant les informations demandées
+	 */
+	public List<PersonInfo> getPersonInfo(String firstName, String lastName) {
+		logger.info("Recherche des informations pour la personne : " + firstName + " " + lastName);
+
+		try {
+			// Récupérer toutes les personnes depuis le référentiel
+			List<Person> persons = personRepository.getAllPersons();
+
+			List<PersonInfo> personInfos = persons.stream()
+					.filter(person -> person.getFirstName().equals(firstName) && person.getLastName().equals(lastName))
+					.map(person -> {
+						// Récupérer le dossier médical de la personne
+						MedicalRecord medicalRecord = medicalRecordRepository
+								.getMedicalRecordByFullName(person.getFirstName(), person.getLastName());
+
+						if (medicalRecord != null) {
+							// Créer un objet PersonMedicalInfo avec les informations de base de la personne
+							InfoPerson infoPerson = new InfoPerson(person.getFirstName(), person.getLastName(),
+									person.getAddress(), person.getEmail());
+
+							// Calculer l'âge de la personne
+							int age = calculateAge(medicalRecord.getBirthdate());
+
+							// Créer un objet PersonInfo avec les informations de la personne et le
+							// dossier médical
+							return new PersonInfo(infoPerson, age, medicalRecord.getMedications(),
+									medicalRecord.getAllergies());
+						}
+						return null;
+					}).filter(personInfo -> personInfo != null).collect(Collectors.toList());
+
+			logger.info("Informations récupérées avec succès pour la personne : " + firstName + " " + lastName);
+			return personInfos;
+		} catch (Exception e) {
+			logger.error(
+					"Erreur lors de la récupération des informations pour la personne : " + firstName + " " + lastName,
+					e);
+		}
+
+		return new ArrayList<>(); // Retourner une liste vide en cas d'erreur
 	}
 
 }
