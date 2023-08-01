@@ -13,11 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.safetynet.alerts.model.Child;
 import com.safetynet.alerts.model.ChildAlert;
+import com.safetynet.alerts.model.Fire;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.model.PersonCoverage;
+import com.safetynet.alerts.model.PersonFire;
 import com.safetynet.alerts.model.PhoneAlert;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
@@ -194,6 +196,58 @@ public class AlertsService {
 		}
 	}
 	
+	/**
+	 * Cette méthode retourne les informations relatives à un incendie à une adresse
+	 * spécifiée.
+	 *
+	 * @param address l'adresse où l'incendie s'est produit
+	 * @return une instance de Fire contenant les informations sur les personnes et
+	 *         la caserne de pompiers
+	 * @throws Exception
+	 */
+	public Fire getFireInformation(String address) throws Exception {
+		try {
+			// Rechercher les personnes associées à l'adresse spécifiée
+			List<Person> persons = personRepository.getPersonByAddress(address);
+			if (persons.isEmpty()) {
+				return null;
+			}
+
+			// Récupérer la caserne de pompiers associée à l'adresse
+			FireStation fireStation = fireStationRepository.getFireStationByAddress(address);
+			if (fireStation == null) {
+				return null;
+			}
+
+			// Créer une liste de PersonFire pour stocker les informations sur les personnes
+			List<PersonFire> personFires = persons.stream().map(person -> {
+				// Récupérer le dossier médical de la personne
+				MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFullName(person.getFirstName(),
+						person.getLastName());
+
+				// Créer un nouvel objet PersonFire pour stocker les informations sur la
+				// personne
+				int age = calculateAge(medicalRecord.getBirthdate());
+				PersonFire personFire = new PersonFire(person.getFirstName(), person.getLastName(), person.getPhone(),
+						age, medicalRecord.getMedications(), medicalRecord.getAllergies());
+
+				return personFire;
+			}).collect(Collectors.toList());
+
+			// Créer un objet Fire avec la liste de PersonFire et le numéro de la caserne de
+			// pompiers
+			Fire fire = new Fire(personFires, fireStation.getStation());
+
+			logger.info("Informations sur l'incendie récupérées avec succès pour l'adresse : " + address);
+			return fire;
+		} catch (Exception e) {
+			logger.error("Erreur lors de la récupération des informations sur l'incendie pour l'adresse : " + address,
+					e);
+			throw new Exception("Une erreur s'est produite lors de la récupération des informations.");
+
+		}
+	}
+
 	/**
 	 * Calcule l'âge à partir de la date de naissance.
 	 *

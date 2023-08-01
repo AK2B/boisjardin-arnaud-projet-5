@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.safetynet.alerts.model.Child;
 import com.safetynet.alerts.model.ChildAlert;
+import com.safetynet.alerts.model.Fire;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
 import com.safetynet.alerts.model.MedicalRecord;
@@ -253,4 +254,34 @@ public class AlertsServiceTest {
 		verify(personRepository, times(1)).getPersonByAddress(address1);
 		verify(personRepository, times(1)).getPersonByAddress(address2);
 	}
+	
+	@Test
+	public void testGetFireInformation() throws Exception {
+		// Arrange
+		String address = "1509 Culver St";
+
+		// Mock de personRepository
+		List<Person> persons = new ArrayList<>();
+		Person person = new Person("John", "Boyd", address, "Culver", "97451", "841-874-6512", "jaboyd@example.com");
+		persons.add(person);
+		when(personRepository.getPersonByAddress(address)).thenReturn(persons);
+
+		// Mock de fireStationRepository
+		FireStation fireStation = new FireStation(address, 1);
+		when(fireStationRepository.getFireStationByAddress(address)).thenReturn(fireStation);
+
+		// Mock de medicalRecordRepository
+		MedicalRecord medicalRecord = new MedicalRecord("John", "Boyd", "03/06/1984", new ArrayList<>(),
+				new ArrayList<>());
+		when(medicalRecordRepository.getMedicalRecordByFullName("John", "Boyd")).thenReturn(medicalRecord);
+
+		// Act
+		Fire result = alertsService.getFireInformation(address);
+
+		// Assert
+		assertThat(result.getPersonFires().size()).isEqualTo(1);
+		assertThat(result.getFireStationNumber()).isEqualTo(1);
+
+	}
+	
 }
