@@ -11,8 +11,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.safetynet.alerts.model.Child;
+import com.safetynet.alerts.model.ChildAlert;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
+import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.model.PersonCoverage;
 import com.safetynet.alerts.repository.FireStationRepository;
@@ -104,6 +107,55 @@ public class AlertsService {
 		}
 
 		return fireStationCoverages;
+	}
+	
+	/**
+	 * Renvoie une liste d'enfants habitant à une adresse donnée, avec les membres
+	 * du foyer.
+	 *
+	 * @param address l'adresse pour laquelle récupérer les informations
+	 * @return un objet ChildAlert contenant la liste des enfants et les membres du
+	 *         foyer
+	 * @throws Exception si une erreur se produit lors de la récupération des
+	 *                   informations
+	 */
+	public ChildAlert getChildAlert(String address) throws Exception {
+		List<Child> children = new ArrayList<>();
+		List<Person> householdMembers = new ArrayList<>();
+		boolean addressFound = false; // Boolean pour suivre si l'adresse a été trouvée
+
+		try {
+			List<Person> persons = personRepository.getAllPersons();
+
+			for (Person person : persons) {
+				if (person.getAddress().equals(address)) {
+					addressFound = true; // L'adresse a été trouvée
+					MedicalRecord medicalRecord = medicalRecordRepository
+							.getMedicalRecordByFullName(person.getFirstName(), person.getLastName());
+					int age = calculateAge(medicalRecord.getBirthdate());
+
+					if (age <= 18) {
+						Child child = new Child(person.getFirstName(), person.getLastName(), age);
+						children.add(child);
+					} else {
+						householdMembers.add(person);
+					}
+				}
+			}
+
+			logger.info("La méthode getChildAlert a été exécutée avec succès.");
+		} catch (Exception e) {
+			
+			logger.error("Une erreur s'est produite lors de l'exécution de la méthode getChildAlert.", e);
+			throw new Exception("Une erreur s'est produite lors de la récupération des informations.");
+		}
+
+		// Si l'adresse n'a pas été trouvée, renvoyer null
+		if (!addressFound) {
+			return null;
+		}
+
+		return new ChildAlert(children, householdMembers);
 	}
 	
 	/**
