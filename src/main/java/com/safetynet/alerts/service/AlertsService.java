@@ -16,10 +16,12 @@ import com.safetynet.alerts.model.ChildAlert;
 import com.safetynet.alerts.model.Fire;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
+import com.safetynet.alerts.model.Flood;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.model.PersonCoverage;
 import com.safetynet.alerts.model.PersonFire;
+import com.safetynet.alerts.model.PersonFlood;
 import com.safetynet.alerts.model.PhoneAlert;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
@@ -246,6 +248,58 @@ public class AlertsService {
 			throw new Exception("Une erreur s'est produite lors de la récupération des informations.");
 
 		}
+	}
+
+	/**
+	 * Récupère une liste de casernes affectées par des inondations avec les
+	 * informations des habitants correspondants.
+	 *
+	 * @param stationNumbers La liste des numéros de caserne.
+	 * @return Liste de Flood contenant les adresses et les informations des
+	 *         habitants.
+	 * @throws Exception
+	 */
+	public List<Flood> getFloodStations(Integer stationNumber) throws Exception {
+
+		List<Flood> floodStations = new ArrayList<>();
+
+		try {
+			// Trouver toutes les adresses correspondant au numéro de station donné
+			List<String> addresses = fireStationRepository.getAllFireStations().stream()
+					.filter(fireStation -> Integer.valueOf(fireStation.getStation()).equals(stationNumber))
+					.map(FireStation::getAddress).collect(Collectors.toList());
+
+			if (addresses.isEmpty()) {
+				return null;
+			}
+
+			// Parcourir chaque adresse et trouver les personnes correspondantes
+			for (String address : addresses) {
+				List<PersonFlood> persons = personRepository.getAllPersons().stream()
+						.filter(person -> person.getAddress().equals(address)).map(person -> {
+							MedicalRecord medicalRecord = medicalRecordRepository
+									.getMedicalRecordByFullName(person.getFirstName(), person.getLastName());
+							List<String> medications = medicalRecord.getMedications();
+							List<String> allergies = medicalRecord.getAllergies();
+							int age = calculateAge(medicalRecord.getBirthdate());
+
+							return new PersonFlood(person.getFirstName(), person.getLastName(), person.getPhone(), age,
+									medications, allergies);
+						}).collect(Collectors.toList());
+
+				Flood flood = new Flood(address, persons);
+				floodStations.add(flood);
+			}
+
+			// Journal des réponses réussies au niveau Info
+			logger.info("La méthode getFloodStations a été exécutée avec succès.");
+		} catch (Exception e) {
+			// Enregistrer les erreurs ou exceptions au niveau Erreur
+			logger.error("Une erreur s'est produite lors de l'exécution de la méthode getFloodStations.", e);
+			throw new Exception("Une erreur s'est produite lors de la récupération des informations.");
+		}
+
+		return floodStations;
 	}
 
 	/**

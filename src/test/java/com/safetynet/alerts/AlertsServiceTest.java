@@ -30,8 +30,10 @@ import com.safetynet.alerts.model.ChildAlert;
 import com.safetynet.alerts.model.Fire;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
+import com.safetynet.alerts.model.Flood;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
+import com.safetynet.alerts.model.PersonFlood;
 import com.safetynet.alerts.model.PhoneAlert;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
@@ -282,6 +284,67 @@ public class AlertsServiceTest {
 		assertThat(result.getPersonFires().size()).isEqualTo(1);
 		assertThat(result.getFireStationNumber()).isEqualTo(1);
 
+	}
+	
+	@Test
+	public void testGetFloodStations() throws Exception {
+		// Arrange
+		Integer stationNumbers = 1;
+
+		// Mocking the fireStationRepository
+		List<FireStation> fireStations = new ArrayList<>();
+		fireStations.add(new FireStation("1509 Culver St", 1));
+		fireStations.add(new FireStation("123 Main St", 2));
+		fireStations.add(new FireStation("456 Elm St", 3));
+		when(fireStationRepository.getAllFireStations()).thenReturn(fireStations);
+
+		// Mocking the personRepository
+		List<Person> persons = new ArrayList<>();
+		persons.add(
+				new Person("John", "Boyd", "1509 Culver St", "Culver", "97451", "841-874-6512", "john@example.com"));
+		persons.add(new Person("Jane", "Smith", "123 Main St", "Culver", "97451", "841-874-1234", "jane@example.com"));
+		persons.add(new Person("Robert", "Doe", "456 Elm St", "Culver", "97451", "841-874-5678", "robert@example.com"));
+		when(personRepository.getAllPersons()).thenReturn(persons);
+
+		// Mocking the medicalRecordRepository
+		MedicalRecord medicalRecord1 = new MedicalRecord("John", "Boyd", "03/06/1984", Arrays.asList("Medicine1"),
+				Arrays.asList("Allergy1"));
+		MedicalRecord medicalRecord2 = new MedicalRecord("Jane", "Smith", "05/01/2015", Arrays.asList("Medicine2"),
+				Arrays.asList("Allergy2"));
+		MedicalRecord medicalRecord3 = new MedicalRecord("Robert", "Doe", "01/05/2016", Arrays.asList("Medicine3"),
+				Arrays.asList("Allergy3"));
+		when(medicalRecordRepository.getMedicalRecordByFullName("John", "Boyd")).thenReturn(medicalRecord1);
+		lenient().when(medicalRecordRepository.getMedicalRecordByFullName("Jane", "Smith")).thenReturn(medicalRecord2);
+		lenient().when(medicalRecordRepository.getMedicalRecordByFullName("Robert", "Doe")).thenReturn(medicalRecord3);
+
+		// Act
+		List<Flood> result = alertsService.getFloodStations(stationNumbers);
+
+		// Assert
+		assertThat(result).isNotNull();		
+		
+		for (int i = 0; i < result.size(); i++) {
+			Flood flood = result.get(i);
+			assertThat(flood.getPersons().size()).isEqualTo(1);
+
+			PersonFlood personFlood = flood.getPersons().get(0);
+			Person person = persons.get(i);
+			MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFullName(person.getFirstName(),
+					person.getLastName());
+
+			assertThat(personFlood.getFirstName()).isEqualTo(person.getFirstName());
+			assertThat(personFlood.getLastName()).isEqualTo(person.getLastName());
+			assertThat(personFlood.getPhone()).isEqualTo(person.getPhone());
+			assertThat(personFlood.getAge()).isEqualTo(alertsService.calculateAge(medicalRecord.getBirthdate()));
+			assertThat(personFlood.getMedications()).isEqualTo(medicalRecord.getMedications());
+			assertThat(personFlood.getAllergies()).isEqualTo(medicalRecord.getAllergies());
+
+		}
+
+		// Verify the method calls
+		verify(fireStationRepository, times(1)).getAllFireStations();
+		verify(personRepository, times(1)).getAllPersons();
+		verify(medicalRecordRepository, times(2)).getMedicalRecordByFullName(anyString(), anyString());
 	}
 	
 }
