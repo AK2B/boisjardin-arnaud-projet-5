@@ -27,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.safetynet.alerts.model.Child;
 import com.safetynet.alerts.model.ChildAlert;
+import com.safetynet.alerts.model.CommunityEmail;
 import com.safetynet.alerts.model.Fire;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
@@ -126,15 +127,6 @@ public class AlertsServiceTest {
         verify(medicalRecordRepository, times(2)).getMedicalRecordByFullName(anyString(), anyString());
     }
 	
-	@Test
-	public void testCalculateAge() {
-		String birthDate = "03/06/1984";
-
-		int age = alertsService.calculateAge(birthDate);
-
-		assertThat(age).isEqualTo(39);
-	}
-
 	@Test
 	public void testGetChildAlert() throws Exception {
 		// Adresse de test
@@ -377,6 +369,63 @@ public class AlertsServiceTest {
 
 		verify(personRepository, times(1)).getAllPersons();
 		verify(medicalRecordRepository, times(1)).getMedicalRecordByFullName("John", "Boyd");
+	}
+
+	@Test
+	public void testGetCommunityEmails() {
+		// Ville de test
+		String city = "Culver";
+
+		// Création de personnes
+		Person person1 = new Person("John", "Boyd", "1509 Culver St", city, "97451", "841-874-6512",
+				"john.boyd@example.com");
+		Person person2 = new Person("Jane", "Smith", "1510 Culver St", city, "97451", "841-874-1234",
+				"jane.smith@example.com");
+		Person person3 = new Person("Robert", "Doe", "123 Main St", "Springfield", "12345", "555-123-4567",
+				"robert.doe@example.com");
+
+		// Liste de personnes
+		List<Person> persons = new ArrayList<>();
+		persons.add(person1);
+		persons.add(person2);
+		persons.add(person3);
+
+		// Configuration de la méthode simulée
+		when(personRepository.getPersonByCity(city)).thenReturn(persons);
+
+		// Appel de la méthode à tester
+		CommunityEmail communityEmail = alertsService.getCommunityEmails(city);
+
+		// Vérification des résultats
+		assertThat(communityEmail).isNotNull();
+
+		List<String> expectedEmails = Arrays.asList("john.boyd@example.com", "jane.smith@example.com");
+		
+		assertThat(communityEmail.getEmails().size()).isEqualTo(expectedEmails.size());
+		Assertions.assertThat(communityEmail.getEmails()).containsAll(expectedEmails);
+		
+		// Vérification que seules les personnes de la ville sont présentes dans la
+		// liste
+		for (Person person : persons) {
+			if (person.getCity().equals(city)) {
+				Assertions.assertThat(communityEmail.getEmails()).contains(person.getEmail());
+				
+			} else {
+				Assertions.assertThat(communityEmail.getEmails()).doesNotContain(person.getEmail());
+			}
+		}
+
+		// Vérification des appels de méthodes simulées
+		verify(personRepository, times(1)).getPersonByCity(city);
+	}
+	
+	@Test
+	public void testCalculateAge() {
+		String birthDate = "03/06/1984";
+
+		int age = alertsService.calculateAge(birthDate);
+
+		assertThat(age).isEqualTo(39);
 	}
 
 }

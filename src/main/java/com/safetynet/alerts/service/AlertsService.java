@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.safetynet.alerts.model.Child;
 import com.safetynet.alerts.model.ChildAlert;
+import com.safetynet.alerts.model.CommunityEmail;
 import com.safetynet.alerts.model.Fire;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
@@ -305,32 +306,6 @@ public class AlertsService {
 	}
 
 	/**
-	 * Calcule l'âge à partir de la date de naissance.
-	 *
-	 * @param birthDate la date de naissance (au format "MM/dd/yyyy")
-	 * @return l'âge calculé
-	 */
-	public int calculateAge(String birthDate) {
-		logger.debug("Calcul de l'âge pour la date de naissance : " + birthDate);
-
-		int age = 0;
-
-		try {
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-			LocalDate parsedDate = LocalDate.parse(birthDate, formatter);
-			LocalDate currentDate = LocalDate.now();
-			Period agePeriod = Period.between(parsedDate, currentDate);
-			age = agePeriod.getYears();
-
-			logger.debug("Âge calculé : " + age);
-		} catch (Exception e) {
-			logger.error("Erreur lors du calcul de l'âge pour la date de naissance : " + birthDate, e);
-		}
-
-		return age;
-	}
-
-	/**
 	 * Cette méthode retourne les informations sur les personnes correspondant au
 	 * prénom et au nom spécifiés.
 	 *
@@ -379,4 +354,63 @@ public class AlertsService {
 		return new ArrayList<>(); // Retourner une liste vide en cas d'erreur
 	}
 
+	/**
+	 * Récupère les adresses e-mail des membres d'une communauté basée sur la ville.
+	 *
+	 * @param city la ville de la communauté
+	 * @return CommunityEmail contenant les adresses e-mail des membres de la
+	 *         communauté
+	 * @throws IllegalArgumentException si la ville est nulle ou vide
+	 */
+	public CommunityEmail getCommunityEmails(String city) throws IllegalArgumentException {
+
+		List<Person> persons;
+		try {
+			persons = personRepository.getPersonByCity(city).stream().filter(person -> city.equals(person.getCity()))
+					.collect(Collectors.toList());
+			// Vérification si la liste des personnes est vide, dans ce cas, la ville n'a
+			// pas été trouvée
+			if (persons.isEmpty()) {
+				return null;
+			}
+		} catch (Exception e) {
+			logger.error("Erreur lors de la récupération des personnes par ville.", e);
+			throw new RuntimeException("Une erreur est survenue lors de la récupération des personnes par ville.", e);
+		}
+
+		List<String> emails = persons.stream().map(Person::getEmail).collect(Collectors.toList());
+
+		CommunityEmail communityEmail = new CommunityEmail();
+		communityEmail.setEmails(emails);
+
+		logger.info("Adresses e-mail récupérées avec succès pour la ville : " + city);
+
+		return communityEmail;
+	}
+	
+	/**
+	 * Calcule l'âge à partir de la date de naissance.
+	 *
+	 * @param birthDate la date de naissance (au format "MM/dd/yyyy")
+	 * @return l'âge calculé
+	 */
+	public int calculateAge(String birthDate) {
+		logger.debug("Calcul de l'âge pour la date de naissance : " + birthDate);
+
+		int age = 0;
+
+		try {
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+			LocalDate parsedDate = LocalDate.parse(birthDate, formatter);
+			LocalDate currentDate = LocalDate.now();
+			Period agePeriod = Period.between(parsedDate, currentDate);
+			age = agePeriod.getYears();
+
+			logger.debug("Âge calculé : " + age);
+		} catch (Exception e) {
+			logger.error("Erreur lors du calcul de l'âge pour la date de naissance : " + birthDate, e);
+		}
+
+		return age;
+	}
 }
