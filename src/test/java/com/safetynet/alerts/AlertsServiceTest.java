@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +31,7 @@ import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.FireStationCoverage;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
+import com.safetynet.alerts.model.PhoneAlert;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
 import com.safetynet.alerts.repository.PersonRepository;
@@ -213,4 +215,42 @@ public class AlertsServiceTest {
 		verify(medicalRecordRepository, times(2)).getMedicalRecordByFullName("John", "Boyd");
 	}
 
+	@Test
+	public void testGetPhoneAlert() throws Exception {
+		int fireStationNumber = 1;
+		String address1 = "1509 Culver St";
+		String address2 = "123 Main St";
+
+		FireStation fireStation1 = new FireStation(address1, fireStationNumber);
+		FireStation fireStation2 = new FireStation(address2, fireStationNumber);
+
+		Person person1 = new Person("John", "Boyd", address1, "Culver", "97451", "841-874-6512",
+				"john.boyd@example.com");
+		Person person2 = new Person("Jane", "Smith", address2, "Culver", "97451", "841-874-1234",
+				"jane.smith@example.com");
+
+		List<FireStation> fireStations = new ArrayList<>();
+		fireStations.add(fireStation1);
+		fireStations.add(fireStation2);
+
+		List<Person> persons1 = new ArrayList<>();
+		persons1.add(person1);
+
+		List<Person> persons2 = new ArrayList<>();
+		persons2.add(person2);
+
+		when(fireStationRepository.getFireStationByStation(fireStationNumber)).thenReturn(fireStations);
+		when(personRepository.getPersonByAddress(address1)).thenReturn(persons1);
+		when(personRepository.getPersonByAddress(address2)).thenReturn(persons2);
+
+		PhoneAlert phoneAlert = alertsService.getPhoneAlert(fireStationNumber);
+
+		assertThat(phoneAlert).isNotNull();
+		assertThat(phoneAlert.getPhoneNumbers().size()).isEqualTo(2);
+		Assertions.assertThat(phoneAlert.getPhoneNumbers()).contains(person1.getPhone()).contains(person2.getPhone());
+
+		verify(fireStationRepository, times(1)).getFireStationByStation(fireStationNumber);
+		verify(personRepository, times(1)).getPersonByAddress(address1);
+		verify(personRepository, times(1)).getPersonByAddress(address2);
+	}
 }

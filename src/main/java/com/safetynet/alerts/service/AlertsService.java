@@ -18,6 +18,7 @@ import com.safetynet.alerts.model.FireStationCoverage;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.model.PersonCoverage;
+import com.safetynet.alerts.model.PhoneAlert;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
 import com.safetynet.alerts.repository.PersonRepository;
@@ -156,6 +157,41 @@ public class AlertsService {
 		}
 
 		return new ChildAlert(children, householdMembers);
+	}
+	
+	/**
+	 * Cette méthode retourne les numéros de téléphone des personnes associées à une
+	 * caserne de pompiers spécifiée.
+	 *
+	 * @param fireStationNumber le numéro de la caserne de pompiers
+	 * @return une instance de PhoneAlert contenant les numéros de téléphone
+	 * @throws Exception
+	 */
+	public PhoneAlert getPhoneAlert(int fireStationNumber) throws Exception {
+		try {
+			List<FireStation> fireStations = fireStationRepository.getFireStationByStation(fireStationNumber);
+			List<String> phoneNumbers = new ArrayList<>();
+
+			for (FireStation fireStation : fireStations) {
+				String fireStationAddress = fireStation.getAddress();
+				List<Person> persons = personRepository.getPersonByAddress(fireStationAddress);
+
+				for (Person person : persons) {
+					phoneNumbers.add(person.getPhone());
+				}
+			}
+
+			PhoneAlert phoneAlert = new PhoneAlert();
+			phoneAlert.setPhoneNumbers(phoneNumbers);
+
+			logger.info(
+					"Numéros de téléphone récupérés avec succès pour la caserne de pompiers n° : " + fireStationNumber);
+			return phoneAlert;
+		} catch (Exception e) {
+			logger.error("Erreur lors de la récupération des numéros de téléphone pour la caserne de pompiers n° : "
+					+ fireStationNumber, e);
+			throw new Exception("Une erreur s'est produite lors de la récupération des informations.");
+		}
 	}
 	
 	/**
