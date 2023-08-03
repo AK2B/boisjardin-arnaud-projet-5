@@ -8,7 +8,7 @@ import lombok.Data;
  * Classe représentant une liste de personnes composition de fire alerte.
  */
 @Data
-public class PersonFire {
+public class PersonFireDTO {
     private String firstName;
     private String lastName;
     private String phone;
@@ -16,7 +16,7 @@ public class PersonFire {
     private List<String> medications;
     private List<String> allergies;
 	
-    public PersonFire(String firstName, String lastName, String phone, int age, List<String> medications,
+    public PersonFireDTO(String firstName, String lastName, String phone, int age, List<String> medications,
 			List<String> allergies) {
 		super();
 		this.firstName = firstName;

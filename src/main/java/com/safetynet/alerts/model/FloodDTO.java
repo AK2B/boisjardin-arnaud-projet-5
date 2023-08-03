@@ -8,12 +8,12 @@ import lombok.Data;
  * Classe représentant une liste de personnes par adresse.
  */
 @Data
-public class Flood {
+public class FloodDTO {
 	
     private String address;
-    private List<PersonFlood> persons;
+    private List<PersonFloodDTO> persons;
 
-    public Flood(String address, List<PersonFlood> persons) {
+    public FloodDTO(String address, List<PersonFloodDTO> persons) {
         this.address = address;
         this.persons = persons;
     }

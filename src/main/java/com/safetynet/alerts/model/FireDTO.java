@@ -9,13 +9,13 @@ import lombok.Data;
  * à une station de pompier.
  */
 @Data
-public class Fire {
-	private List<PersonFire> personFires;
+public class FireDTO {
+	private List<PersonFireDTO> personFireDTOs;
 	private int fireStationNumber;
 
-	public Fire(List<PersonFire> personFires, int fireStationNumber) {
+	public FireDTO(List<PersonFireDTO> personFireDTOs, int fireStationNumber) {
 		super();
-		this.personFires = personFires;
+		this.personFireDTOs = personFireDTOs;
 		this.fireStationNumber = fireStationNumber;
 	}
 

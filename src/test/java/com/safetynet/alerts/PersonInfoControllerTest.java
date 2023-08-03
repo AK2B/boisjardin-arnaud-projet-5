@@ -20,8 +20,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.safetynet.alerts.controller.PersonInfoController;
-import com.safetynet.alerts.model.InfoPerson;
-import com.safetynet.alerts.model.PersonInfo;
+import com.safetynet.alerts.model.InfoPersonDTO;
+import com.safetynet.alerts.model.PersonInfoDTO;
 import com.safetynet.alerts.service.AlertsService;
 
 @WebMvcTest(controllers = { PersonInfoController.class, AlertsService.class })
@@ -36,22 +36,20 @@ public class PersonInfoControllerTest {
 
 	@Test
 	public void testGetPersonInfo() throws Exception {
-		String firstName = "John";
-		String lastName = "Boyd";
-
-		// Créer une liste de PersonInfo
-		List<PersonInfo> personInfos = new ArrayList<>();
-		personInfos.add(new PersonInfo(new InfoPerson(firstName, lastName, "1509 Culver St", "jaboyd@email.com"), 39,
+		
+		// Créer une liste de PersonInfoDTO
+		List<PersonInfoDTO> personInfoDTOs = new ArrayList<>();
+		personInfoDTOs.add(new PersonInfoDTO(new InfoPersonDTO("John", "Boyd", "1509 Culver St", "jaboyd@email.com"), 39,
 				Arrays.asList("aznol:350mg", "hydrapermazol:100mg"), Arrays.asList("nillacilan")));
 
 		// Définir le comportement du service de l'application mocké
-		when(alertsService.getPersonInfo(firstName, lastName)).thenReturn(personInfos);
+		when(alertsService.getPersonInfoDTO("John", "Boyd")).thenReturn(personInfoDTOs);
 
 		// Exécuter la requête GET pour obtenir les informations sur la personne
-		mockMvc.perform(MockMvcRequestBuilders.get("/personInfo").param("firstName", firstName)
-				.param("lastName", lastName).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].infoPerson.firstName").value(firstName))
-				.andExpect(jsonPath("$[0].infoPerson.lastName").value(lastName))
+		mockMvc.perform(MockMvcRequestBuilders.get("/personInfo").param("firstName", "John")
+				.param("lastName", "Boyd").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].infoPersonDTO.firstName").value("John"))
+				.andExpect(jsonPath("$[0].infoPersonDTO.lastName").value("Boyd"))
 				.andExpect(jsonPath("$[0].age").value(39))
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0].medications[0]").value("aznol:350mg"))
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0].medications[1]").value("hydrapermazol:100mg"))
@@ -71,7 +69,7 @@ public class PersonInfoControllerTest {
         String firstName = "John";
         String lastName = "Boyd";
         
-        when(alertsService.getPersonInfo(firstName, lastName)).thenReturn(new ArrayList<>());
+        when(alertsService.getPersonInfoDTO(firstName, lastName)).thenReturn(new ArrayList<>());
 
         mockMvc.perform(MockMvcRequestBuilders.get("/personInfo")
                 .param("firstName", firstName)

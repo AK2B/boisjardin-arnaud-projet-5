@@ -8,7 +8,7 @@ import lombok.Data;
  * Classe représentant une liste d'email.
  */
 @Data
-public class CommunityEmail {
+public class CommunityEmailDTO {
 
 	private List<String> emails;
 

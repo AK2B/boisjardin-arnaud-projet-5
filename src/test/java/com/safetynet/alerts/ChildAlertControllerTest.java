@@ -19,8 +19,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.safetynet.alerts.controller.ChildAlertController;
-import com.safetynet.alerts.model.Child;
-import com.safetynet.alerts.model.ChildAlert;
+import com.safetynet.alerts.model.ChildDTO;
+import com.safetynet.alerts.model.ChildAlertDTO;
 import com.safetynet.alerts.model.Person;
 import com.safetynet.alerts.service.AlertsService;
 
@@ -37,15 +37,15 @@ public class ChildAlertControllerTest {
     @Test
     public void testGetChildAlert() throws Exception {
         String address = "1509 Culver St";
-        Child child1 = new Child("Tenley", "Boyd", 11);
-        Child child2 = new Child("Roger", "Boyd", 5);
-        List<Child> children = Arrays.asList(child1, child2);
+        ChildDTO child1 = new ChildDTO("Tenley", "Boyd", 11);
+        ChildDTO child2 = new ChildDTO("Roger", "Boyd", 5);
+        List<ChildDTO> children = Arrays.asList(child1, child2);
         Person person1 = new Person("John", "Boyd", address, "Culver", "97451", "841-874-6512", "jaboyd@email.com");
         Person person2 = new Person("Jacob", "Boyd", address, "Culver", "97451", "841-874-6513", "drk@email.com");
         List<Person> householdMembers = Arrays.asList(person1, person2);
-        ChildAlert childAlert = new ChildAlert(children, householdMembers);
+        ChildAlertDTO childAlertDTO = new ChildAlertDTO(children, householdMembers);
 
-        when(alertsService.getChildAlert(address)).thenReturn(childAlert);
+        when(alertsService.getChildAlert(address)).thenReturn(childAlertDTO);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/childAlert")
                 .param("address", address)

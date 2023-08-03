@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.safetynet.alerts.controller.FireStationController;
 import com.safetynet.alerts.model.FireStation;
-import com.safetynet.alerts.model.FireStationCoverage;
+import com.safetynet.alerts.model.FireStationCoverageDTO;
 import com.safetynet.alerts.service.AlertsService;
 import com.safetynet.alerts.service.FireStationService;
 
@@ -48,12 +48,12 @@ public class FireStationControllerTest {
 
 		int fireStationNumber = 3;
 
-		// Créer une liste de FireStationCoverage
-		List<FireStationCoverage> fireStationCoverages = new ArrayList<>();
-		fireStationCoverages.add(new FireStationCoverage("1509 Culver St", 3, 2, new ArrayList<>()));
+		// Créer une liste de FireStationCoverageDTO
+		List<FireStationCoverageDTO> fireStationCoverageDTOs = new ArrayList<>();
+		fireStationCoverageDTOs.add(new FireStationCoverageDTO("1509 Culver St", 3, 2, new ArrayList<>()));
 
 		// Définir le comportement du service de l'application mocké
-		when(alertsService.getFireStationCoverage(fireStationNumber)).thenReturn(fireStationCoverages);
+		when(alertsService.getFireStationCoverage(fireStationNumber)).thenReturn(fireStationCoverageDTOs);
 
 		// Exécuter la requête GET pour obtenir la couverture de la caserne de pompiers
 		mockMvc.perform(MockMvcRequestBuilders.get("/firestation")

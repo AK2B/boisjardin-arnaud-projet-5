@@ -21,8 +21,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.safetynet.alerts.controller.FloodController;
-import com.safetynet.alerts.model.Flood;
-import com.safetynet.alerts.model.PersonFlood;
+import com.safetynet.alerts.model.FloodDTO;
+import com.safetynet.alerts.model.PersonFloodDTO;
 import com.safetynet.alerts.service.AlertsService;
 
 @WebMvcTest(controllers = { FloodController.class, AlertsService.class })
@@ -40,17 +40,17 @@ public class FloodControllerTest {
 		// Numéros de station pour laquel nous voulons les informations de crue
 		Integer stationNumbers = 1;
 
-		// Créer une liste de Flood
-		List<Flood> floodStations = new ArrayList<>();
-		List<PersonFlood> persons1 = Arrays.asList(
-				new PersonFlood("Jonanathan", "Marrack", "841-874-6513", 34, new ArrayList<>(), new ArrayList<>()));
+		// Créer une liste de FloodDTO
+		List<FloodDTO> floodStations = new ArrayList<>();
+		List<PersonFloodDTO> persons1 = Arrays.asList(
+				new PersonFloodDTO("Jonanathan", "Marrack", "841-874-6513", 34, new ArrayList<>(), new ArrayList<>()));
 
-		floodStations.add(new Flood("29 15th St", persons1));
+		floodStations.add(new FloodDTO("29 15th St", persons1));
 
-		List<PersonFlood> persons2 = Arrays.asList(
-				new PersonFlood("Peter", "Duncan", "841-874-6512", 22, new ArrayList<>(), Arrays.asList("shellfish")));
+		List<PersonFloodDTO> persons2 = Arrays.asList(
+				new PersonFloodDTO("Peter", "Duncan", "841-874-6512", 22, new ArrayList<>(), Arrays.asList("shellfish")));
 
-		floodStations.add(new Flood("644 Gershwin Cir", persons2));
+		floodStations.add(new FloodDTO("644 Gershwin Cir", persons2));
 
 		// Définir le comportement du service de l'application mocké
 		when(alertsService.getFloodStations(stationNumbers)).thenReturn(floodStations);

@@ -9,10 +9,10 @@ import lombok.Data;
  * Classe représentant une liste de numéro de téléphone.
  */
 @Data
-public class PhoneAlert {
+public class PhoneAlertDTO {
 	private List<String> phoneNumbers;
 
-	public PhoneAlert() {
+	public PhoneAlertDTO() {
 		this.phoneNumbers = new ArrayList<>();
 	}
 

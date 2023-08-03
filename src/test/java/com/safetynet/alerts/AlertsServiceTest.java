@@ -25,18 +25,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.safetynet.alerts.model.Child;
-import com.safetynet.alerts.model.ChildAlert;
-import com.safetynet.alerts.model.CommunityEmail;
-import com.safetynet.alerts.model.Fire;
+import com.safetynet.alerts.model.ChildDTO;
+import com.safetynet.alerts.model.ChildAlertDTO;
+import com.safetynet.alerts.model.CommunityEmailDTO;
+import com.safetynet.alerts.model.FireDTO;
 import com.safetynet.alerts.model.FireStation;
-import com.safetynet.alerts.model.FireStationCoverage;
-import com.safetynet.alerts.model.Flood;
+import com.safetynet.alerts.model.FireStationCoverageDTO;
+import com.safetynet.alerts.model.FloodDTO;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
-import com.safetynet.alerts.model.PersonFlood;
-import com.safetynet.alerts.model.PersonInfo;
-import com.safetynet.alerts.model.PhoneAlert;
+import com.safetynet.alerts.model.PersonFloodDTO;
+import com.safetynet.alerts.model.PersonInfoDTO;
+import com.safetynet.alerts.model.PhoneAlertDTO;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
 import com.safetynet.alerts.repository.PersonRepository;
@@ -106,13 +106,13 @@ public class AlertsServiceTest {
         lenient().when(medicalRecordRepository.getMedicalRecordByFullName("Robert", "Doe")).thenReturn(medicalRecord3);
 
         // Act
-        List<FireStationCoverage> result = alertsService.getFireStationCoverage(fireStationNumber);
+        List<FireStationCoverageDTO> result = alertsService.getFireStationCoverage(fireStationNumber);
 
         //Assert
         assertThat(result).isNotNull();
        
         // Filtrer pour "Zone désservie"
-        FireStationCoverage zoneDesservieCoverage = result.stream()
+        FireStationCoverageDTO zoneDesservieCoverage = result.stream()
                 .filter(coverage -> coverage.getAddress().equals("Zone désservie"))
                 .findFirst()
                 .orElse(null);
@@ -161,12 +161,12 @@ public class AlertsServiceTest {
 		lenient().when(medicalRecordRepository.getMedicalRecordByFullName("Robert", "Doe")).thenReturn(medicalRecord3);
 
 		// Appel de la méthode à tester
-		ChildAlert childAlert = alertsService.getChildAlert(address);
+		ChildAlertDTO childAlertDTO = alertsService.getChildAlert(address);
 
 		// Vérification des résultats
-		assertThat(childAlert).isNotNull();
+		assertThat(childAlertDTO).isNotNull();
 
-		List<Child> expectedChildren = new ArrayList<>();
+		List<ChildDTO> expectedChildren = new ArrayList<>();
 
 		// Ajouter les enfants qui habitent à l'adresse demandée
 		for (Person person : persons) {
@@ -176,8 +176,8 @@ public class AlertsServiceTest {
 				int age = alertsService.calculateAge(medicalRecord.getBirthdate());
 
 				if (age <= 18) {
-					Child child = new Child(person.getFirstName(), person.getLastName(), age);
-					expectedChildren.add(child);
+					ChildDTO childDTO = new ChildDTO(person.getFirstName(), person.getLastName(), age);
+					expectedChildren.add(childDTO);
 				}
 			}
 		}
@@ -185,12 +185,12 @@ public class AlertsServiceTest {
 		List<Person> expectedHouseholdMembers = new ArrayList<>();
 		expectedHouseholdMembers.add(person1);
 
-		assertThat(childAlert.getChildren().size()).isEqualTo(expectedChildren.size());
-		assertThat(childAlert.getHouseholdMembers().size()).isEqualTo(expectedHouseholdMembers.size());
+		assertThat(childAlertDTO.getChildren().size()).isEqualTo(expectedChildren.size());
+		assertThat(childAlertDTO.getHouseholdMembers().size()).isEqualTo(expectedHouseholdMembers.size());
 
 		for (int i = 0; i < expectedChildren.size(); i++) {
-			Child expectedChild = expectedChildren.get(i);
-			Child actualChild = childAlert.getChildren().get(i);
+			ChildDTO expectedChild = expectedChildren.get(i);
+			ChildDTO actualChild = childAlertDTO.getChildren().get(i);
 
 			assertThat(actualChild.getFirstName()).isEqualTo(expectedChild.getFirstName());
 			assertThat(actualChild.getLastName()).isEqualTo(expectedChild.getLastName());
@@ -199,7 +199,7 @@ public class AlertsServiceTest {
 		}
 		for (int i = 0; i < expectedHouseholdMembers.size(); i++) {
 			Person expectedMember = expectedHouseholdMembers.get(i);
-			Person actualMember = childAlert.getHouseholdMembers().get(i);
+			Person actualMember = childAlertDTO.getHouseholdMembers().get(i);
 
 			assertThat(actualMember.getFirstName()).isEqualTo(expectedMember.getFirstName());
 			assertThat(actualMember.getLastName()).isEqualTo(expectedMember.getLastName());
@@ -239,11 +239,11 @@ public class AlertsServiceTest {
 		when(personRepository.getPersonByAddress(address1)).thenReturn(persons1);
 		when(personRepository.getPersonByAddress(address2)).thenReturn(persons2);
 
-		PhoneAlert phoneAlert = alertsService.getPhoneAlert(fireStationNumber);
+		PhoneAlertDTO phoneAlertDTO = alertsService.getPhoneAlert(fireStationNumber);
 
-		assertThat(phoneAlert).isNotNull();
-		assertThat(phoneAlert.getPhoneNumbers().size()).isEqualTo(2);
-		Assertions.assertThat(phoneAlert.getPhoneNumbers()).contains(person1.getPhone()).contains(person2.getPhone());
+		assertThat(phoneAlertDTO).isNotNull();
+		assertThat(phoneAlertDTO.getPhoneNumbers().size()).isEqualTo(2);
+		Assertions.assertThat(phoneAlertDTO.getPhoneNumbers()).contains(person1.getPhone()).contains(person2.getPhone());
 
 		verify(fireStationRepository, times(1)).getFireStationByStation(fireStationNumber);
 		verify(personRepository, times(1)).getPersonByAddress(address1);
@@ -271,10 +271,10 @@ public class AlertsServiceTest {
 		when(medicalRecordRepository.getMedicalRecordByFullName("John", "Boyd")).thenReturn(medicalRecord);
 
 		// Act
-		Fire result = alertsService.getFireInformation(address);
+		FireDTO result = alertsService.getFireInformation(address);
 
 		// Assert
-		assertThat(result.getPersonFires().size()).isEqualTo(1);
+		assertThat(result.getPersonFireDTOs().size()).isEqualTo(1);
 		assertThat(result.getFireStationNumber()).isEqualTo(1);
 
 	}
@@ -311,26 +311,26 @@ public class AlertsServiceTest {
 		lenient().when(medicalRecordRepository.getMedicalRecordByFullName("Robert", "Doe")).thenReturn(medicalRecord3);
 
 		// Act
-		List<Flood> result = alertsService.getFloodStations(stationNumbers);
+		List<FloodDTO> result = alertsService.getFloodStations(stationNumbers);
 
 		// Assert
 		assertThat(result).isNotNull();		
 		
 		for (int i = 0; i < result.size(); i++) {
-			Flood flood = result.get(i);
-			assertThat(flood.getPersons().size()).isEqualTo(1);
+			FloodDTO floodDTO = result.get(i);
+			assertThat(floodDTO.getPersons().size()).isEqualTo(1);
 
-			PersonFlood personFlood = flood.getPersons().get(0);
+			PersonFloodDTO personFloodDTO = floodDTO.getPersons().get(0);
 			Person person = persons.get(i);
 			MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFullName(person.getFirstName(),
 					person.getLastName());
 
-			assertThat(personFlood.getFirstName()).isEqualTo(person.getFirstName());
-			assertThat(personFlood.getLastName()).isEqualTo(person.getLastName());
-			assertThat(personFlood.getPhone()).isEqualTo(person.getPhone());
-			assertThat(personFlood.getAge()).isEqualTo(alertsService.calculateAge(medicalRecord.getBirthdate()));
-			assertThat(personFlood.getMedications()).isEqualTo(medicalRecord.getMedications());
-			assertThat(personFlood.getAllergies()).isEqualTo(medicalRecord.getAllergies());
+			assertThat(personFloodDTO.getFirstName()).isEqualTo(person.getFirstName());
+			assertThat(personFloodDTO.getLastName()).isEqualTo(person.getLastName());
+			assertThat(personFloodDTO.getPhone()).isEqualTo(person.getPhone());
+			assertThat(personFloodDTO.getAge()).isEqualTo(alertsService.calculateAge(medicalRecord.getBirthdate()));
+			assertThat(personFloodDTO.getMedications()).isEqualTo(medicalRecord.getMedications());
+			assertThat(personFloodDTO.getAllergies()).isEqualTo(medicalRecord.getAllergies());
 
 		}
 
@@ -353,19 +353,19 @@ public class AlertsServiceTest {
 		when(personRepository.getAllPersons()).thenReturn(persons);
 		when(medicalRecordRepository.getMedicalRecordByFullName("John", "Boyd")).thenReturn(medicalRecord);
 
-		List<PersonInfo> personInfos = alertsService.getPersonInfo("John", "Boyd");
+		List<PersonInfoDTO> personInfoDTOs = alertsService.getPersonInfoDTO("John", "Boyd");
 
-		assertThat(personInfos.size()).isEqualTo(1);
+		assertThat(personInfoDTOs.size()).isEqualTo(1);
 
-		PersonInfo personInfo = personInfos.get(0);
+		PersonInfoDTO personInfoDTO = personInfoDTOs.get(0);
 
-		assertThat(personInfo.getInfoPerson().getFirstName()).isEqualTo("John");
-		assertThat(personInfo.getInfoPerson().getLastName()).isEqualTo("Boyd");
-		assertThat(personInfo.getInfoPerson().getAddress()).isEqualTo("1509 Culver St");
-		assertThat(personInfo.getInfoPerson().getEmail()).isEqualTo("jaboyd@email.com");
-		assertThat(personInfo.getAge()).isEqualTo(39);
-		assertThat(personInfo.getMedications().size()).isEqualTo(0);
-		assertThat(personInfo.getAllergies().size()).isEqualTo(0);
+		assertThat(personInfoDTO.getInfoPersonDTO().getFirstName()).isEqualTo("John");
+		assertThat(personInfoDTO.getInfoPersonDTO().getLastName()).isEqualTo("Boyd");
+		assertThat(personInfoDTO.getInfoPersonDTO().getAddress()).isEqualTo("1509 Culver St");
+		assertThat(personInfoDTO.getInfoPersonDTO().getEmail()).isEqualTo("jaboyd@email.com");
+		assertThat(personInfoDTO.getAge()).isEqualTo(39);
+		assertThat(personInfoDTO.getMedications().size()).isEqualTo(0);
+		assertThat(personInfoDTO.getAllergies().size()).isEqualTo(0);
 
 		verify(personRepository, times(1)).getAllPersons();
 		verify(medicalRecordRepository, times(1)).getMedicalRecordByFullName("John", "Boyd");
@@ -394,24 +394,24 @@ public class AlertsServiceTest {
 		when(personRepository.getPersonByCity(city)).thenReturn(persons);
 
 		// Appel de la méthode à tester
-		CommunityEmail communityEmail = alertsService.getCommunityEmails(city);
+		CommunityEmailDTO communityEmailDTO = alertsService.getCommunityEmails(city);
 
 		// Vérification des résultats
-		assertThat(communityEmail).isNotNull();
+		assertThat(communityEmailDTO).isNotNull();
 
 		List<String> expectedEmails = Arrays.asList("john.boyd@example.com", "jane.smith@example.com");
 		
-		assertThat(communityEmail.getEmails().size()).isEqualTo(expectedEmails.size());
-		Assertions.assertThat(communityEmail.getEmails()).containsAll(expectedEmails);
+		assertThat(communityEmailDTO.getEmails().size()).isEqualTo(expectedEmails.size());
+		Assertions.assertThat(communityEmailDTO.getEmails()).containsAll(expectedEmails);
 		
 		// Vérification que seules les personnes de la ville sont présentes dans la
 		// liste
 		for (Person person : persons) {
 			if (person.getCity().equals(city)) {
-				Assertions.assertThat(communityEmail.getEmails()).contains(person.getEmail());
+				Assertions.assertThat(communityEmailDTO.getEmails()).contains(person.getEmail());
 				
 			} else {
-				Assertions.assertThat(communityEmail.getEmails()).doesNotContain(person.getEmail());
+				Assertions.assertThat(communityEmailDTO.getEmails()).doesNotContain(person.getEmail());
 			}
 		}
 

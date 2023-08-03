@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.safetynet.alerts.model.FireStation;
-import com.safetynet.alerts.model.FireStationCoverage;
+import com.safetynet.alerts.model.FireStationCoverageDTO;
 import com.safetynet.alerts.service.AlertsService;
 import com.safetynet.alerts.service.FireStationService;
 
@@ -31,7 +30,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/firestation")
-@Tag(name = "fireStation", description = "Fire Station API")
+@Tag(name = "fireStation", description = "FireDTO Station API")
 public class FireStationController {
 
 	private static final Logger logger = LogManager.getLogger(FireStationController.class);
@@ -39,7 +38,6 @@ public class FireStationController {
 	private FireStationService fireStationService;
 	private AlertsService alertsService;
 
-	@Autowired
 	public FireStationController(FireStationService fireStationService, AlertsService alertsService) {
 		this.fireStationService = fireStationService;
 		this.alertsService = alertsService;
@@ -48,11 +46,11 @@ public class FireStationController {
 	@GetMapping
 	@Operation(summary = "Get fire station coverage")
 	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Success", content = {
-			@Content(schema = @Schema(implementation = FireStationCoverage.class), mediaType = "application/json") }),
+			@Content(schema = @Schema(implementation = FireStationCoverageDTO.class), mediaType = "application/json") }),
 			@ApiResponse(responseCode = "400", description = "Bad Request"),
-			@ApiResponse(responseCode = "404", description = "Fire station not found"),
+			@ApiResponse(responseCode = "404", description = "FireDTO station not found"),
 			@ApiResponse(responseCode = "500", description = "Internal server error") })
-	public ResponseEntity<List<FireStationCoverage>> getFireStationCoverage(
+	public ResponseEntity<List<FireStationCoverageDTO>> getFireStationCoverage(
 			@RequestParam("stationNumber") String fireStationNumberStr) {
 		try {
 			if (fireStationNumberStr == null || fireStationNumberStr.isEmpty()) {
@@ -68,13 +66,12 @@ public class FireStationController {
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 
-			List<FireStationCoverage> coverage = alertsService.getFireStationCoverage(fireStationNumber);
+			List<FireStationCoverageDTO> coverage = alertsService.getFireStationCoverage(fireStationNumber);
 
 			if (coverage == null) {
 				logger.error("La station n'existe pas.");
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-			logger.info("La méthode getFireStationCoverage a été exécutée avec succès.");
 			return new ResponseEntity<>(coverage, HttpStatus.OK);
 		} catch (Exception e) {
 			logger.error("Une autre exception est levée.");
@@ -87,7 +84,7 @@ public class FireStationController {
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "Success", content = {
 					@Content(schema = @Schema(implementation = FireStation.class), mediaType = "application/json") }),
-			@ApiResponse(responseCode = "404", description = "Fire station not found") })
+			@ApiResponse(responseCode = "404", description = "FireDTO station not found") })
 	public ResponseEntity<FireStation> getFireStationByAddress(@PathVariable String address) {
 		FireStation fireStation = fireStationService.getFireStationByAddress(address);
 		if (fireStation != null) {
@@ -101,7 +98,7 @@ public class FireStationController {
 
 	@PostMapping
 	@Operation(summary = "Add a new fire station")
-	@ApiResponses({ @ApiResponse(responseCode = "201", description = "Fire station created") })
+	@ApiResponses({ @ApiResponse(responseCode = "201", description = "FireDTO station created") })
 	public ResponseEntity<String> addFireStation(@RequestBody FireStation fireStation) {
 		fireStationService.addFireStation(fireStation);
 		logger.info("La station a été créé : {}.", fireStation);
@@ -110,8 +107,8 @@ public class FireStationController {
 
 	@PutMapping("/{address}")
 	@Operation(summary = "Update a fire station")
-	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Fire station updated"),
-			@ApiResponse(responseCode = "404", description = "Fire station not found") })
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "FireDTO station updated"),
+			@ApiResponse(responseCode = "404", description = "FireDTO station not found") })
 	public ResponseEntity<String> updateFireStation(@PathVariable String address,
 			@RequestBody FireStation fireStation) {
 		FireStation existingFireStation = fireStationService.getFireStationByAddress(address);
@@ -128,7 +125,7 @@ public class FireStationController {
 
 	@DeleteMapping("/{address}")
 	@Operation(summary = "Delete a fire station")
-	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Fire station deleted") })
+	@ApiResponses({ @ApiResponse(responseCode = "200", description = "FireDTO station deleted") })
 	public ResponseEntity<String> deleteFireStation(@PathVariable String address) {
 		fireStationService.deleteFireStation(address);
 		logger.info("La station a été supprimé avec l'adresse : {}.", address);

@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.safetynet.alerts.controller.PhoneAlertController;
-import com.safetynet.alerts.model.PhoneAlert;
+import com.safetynet.alerts.model.PhoneAlertDTO;
 import com.safetynet.alerts.service.AlertsService;
 
 @WebMvcTest(controllers = { PhoneAlertController.class, AlertsService.class })
@@ -43,12 +43,12 @@ public class PhoneAlertControllerTest {
 		// Créer une liste de numéros de téléphone
 		List<String> phoneNumbers = Arrays.asList("841-874-651", "841-874-8547");
 
-		// Créer un objet PhoneAlert avec les numéros de téléphone
-		PhoneAlert phoneAlert = new PhoneAlert();
-		phoneAlert.setPhoneNumbers(phoneNumbers);
+		// Créer un objet PhoneAlertDTO avec les numéros de téléphone
+		PhoneAlertDTO phoneAlertDTO = new PhoneAlertDTO();
+		phoneAlertDTO.setPhoneNumbers(phoneNumbers);
 
 		// Définir le comportement du service de l'application mocké
-		when(alertsService.getPhoneAlert(fireStationNumber)).thenReturn(phoneAlert);
+		when(alertsService.getPhoneAlert(fireStationNumber)).thenReturn(phoneAlertDTO);
 
 		// Exécuter la requête GET pour obtenir les numéros de téléphone de la caserne
 		// de pompiers

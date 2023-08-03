@@ -2,7 +2,6 @@ package com.safetynet.alerts.controller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.safetynet.alerts.model.PhoneAlert;
+import com.safetynet.alerts.model.PhoneAlertDTO;
 import com.safetynet.alerts.service.AlertsService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +28,6 @@ public class PhoneAlertController {
 
 	private AlertsService alertsService;
 
-	@Autowired
 	public PhoneAlertController(AlertsService alertsService) {
 		this.alertsService = alertsService;
 	}
@@ -38,9 +36,9 @@ public class PhoneAlertController {
 	@Operation(summary = "Get phone alert by fire station number")
 	@ApiResponses({
 			@ApiResponse(responseCode = "200", description = "Success", content = {
-					@Content(schema = @Schema(implementation = PhoneAlert.class), mediaType = "application/json") }),
-			@ApiResponse(responseCode = "404", description = "Fire station not found")})
-	public ResponseEntity<PhoneAlert> getPhoneAlert(@RequestParam("firestation") String firestationNumberStr) throws Exception {
+					@Content(schema = @Schema(implementation = PhoneAlertDTO.class), mediaType = "application/json") }),
+			@ApiResponse(responseCode = "404", description = "FireDTO station not found")})
+	public ResponseEntity<PhoneAlertDTO> getPhoneAlert(@RequestParam("firestation") String firestationNumberStr) throws Exception {
 		
 			if (firestationNumberStr == null || firestationNumberStr.isEmpty()) {
 				logger.error("Le nuréro de station est nul ou vide.");
@@ -53,14 +51,13 @@ public class PhoneAlertController {
 				logger.error("Le nuréro de station doit être un entier.");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 			}
-			PhoneAlert phoneAlert = alertsService.getPhoneAlert(firestationNumber);
+			PhoneAlertDTO phoneAlertDTO = alertsService.getPhoneAlert(firestationNumber);
 
-			if (phoneAlert == null) {
+			if (phoneAlertDTO == null) {
 				logger.error("La station n'a pas été trouvé : {}", firestationNumber);
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 			}
-			logger.info("La méthode getPhoneAlert a été exécutée avec succès.");
-			return ResponseEntity.ok(phoneAlert);
+			return ResponseEntity.ok(phoneAlertDTO);
 		
 	}
 }

@@ -3,7 +3,6 @@ package com.safetynet.alerts.repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.safetynet.alerts.config.DataConfig;
@@ -14,7 +13,6 @@ public class PersonRepository {
 
     private final List<Person> persons;
     
-    @Autowired
     public PersonRepository(DataConfig dataConfig) {
         this.persons = dataConfig.getPersons();
     }

@@ -130,23 +130,28 @@
 				<version>0.8.10</version>
 				<configuration>
 					<excludes>
-						<exclude>**/model/*</exclude>
+						<exclude>com/safetynet/alerts/model/**</exclude>
+						<exclude>com/safetynet/alerts/repository/**</exclude>
+						<exclude>com/safetynet/alerts/service/FireStationService.class</exclude>
+						<exclude>com/safetynet/alerts/service/MedicalRecordService.class</exclude>
+						<exclude>com/safetynet/alerts/service/PersonService.class</exclude>
 					</excludes>
 				</configuration>
 				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>test</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
+                <execution>
+                    <id>prepare-agent</id>
+                    <goals>
+                        <goal>prepare-agent</goal>
+                    </goals>
+                </execution>
+                <execution>
+                    <id>report</id>
+                    <phase>test</phase>
+                    <goals>
+                        <goal>report</goal>
+                    </goals>
+                </execution>
+            </executions>
 			</plugin>
 			<!-- Plugin Surefire pour l'exécution des tests -->
 			<plugin>

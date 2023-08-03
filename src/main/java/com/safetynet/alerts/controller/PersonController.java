@@ -2,7 +2,6 @@ package com.safetynet.alerts.controller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +32,6 @@ public class PersonController {
 
 	private PersonService personService;
 
-	@Autowired
 	public PersonController(PersonService personService) {
 		this.personService = personService;
 	}

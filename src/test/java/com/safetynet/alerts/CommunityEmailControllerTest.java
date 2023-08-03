@@ -19,7 +19,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.safetynet.alerts.controller.CommunityEmailController;
-import com.safetynet.alerts.model.CommunityEmail;
+import com.safetynet.alerts.model.CommunityEmailDTO;
 import com.safetynet.alerts.service.AlertsService;
 
 @WebMvcTest(controllers = { CommunityEmailController.class, AlertsService.class })
@@ -39,11 +39,11 @@ public class CommunityEmailControllerTest {
 		// Créer une liste d'email
 		List<String> emails = Arrays.asList("jaboyd@email.com", "drk@email.com");
 
-		// Créer un objet CommunityEmail avec les emails
-		CommunityEmail communityEmail = new CommunityEmail();
-		communityEmail.setEmails(emails);
+		// Créer un objet CommunityEmailDTO avec les emails
+		CommunityEmailDTO communityEmailDTO = new CommunityEmailDTO();
+		communityEmailDTO.setEmails(emails);
 
-		when(alertsService.getCommunityEmails(city)).thenReturn(communityEmail);
+		when(alertsService.getCommunityEmails(city)).thenReturn(communityEmailDTO);
 
 		mockMvc.perform(MockMvcRequestBuilders.get("/communityEmail").param("city", city)
 				.contentType(MediaType.APPLICATION_JSON)).andExpect(MockMvcResultMatchers.status().isOk())

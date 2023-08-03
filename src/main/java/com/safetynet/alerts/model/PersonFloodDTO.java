@@ -9,7 +9,7 @@ import lombok.Data;
  * composition pour l'inondation.
  */
 @Data
-public class PersonFlood {
+public class PersonFloodDTO {
 
 	private String firstName;
 	private String lastName;
@@ -18,7 +18,7 @@ public class PersonFlood {
 	private List<String> medications;
 	private List<String> allergies;
 
-	public PersonFlood(String firstName, String lastName, String phone, int age, List<String> medications,
+	public PersonFloodDTO(String firstName, String lastName, String phone, int age, List<String> medications,
 			List<String> allergies) {
 		this.firstName = firstName;
 		this.lastName = lastName;

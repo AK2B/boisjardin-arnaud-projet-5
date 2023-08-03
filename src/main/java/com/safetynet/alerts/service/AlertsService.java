@@ -11,21 +11,21 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import com.safetynet.alerts.model.Child;
-import com.safetynet.alerts.model.ChildAlert;
-import com.safetynet.alerts.model.CommunityEmail;
-import com.safetynet.alerts.model.Fire;
+import com.safetynet.alerts.model.ChildDTO;
+import com.safetynet.alerts.model.ChildAlertDTO;
+import com.safetynet.alerts.model.CommunityEmailDTO;
+import com.safetynet.alerts.model.FireDTO;
 import com.safetynet.alerts.model.FireStation;
-import com.safetynet.alerts.model.FireStationCoverage;
-import com.safetynet.alerts.model.Flood;
-import com.safetynet.alerts.model.InfoPerson;
+import com.safetynet.alerts.model.FireStationCoverageDTO;
+import com.safetynet.alerts.model.FloodDTO;
+import com.safetynet.alerts.model.InfoPersonDTO;
 import com.safetynet.alerts.model.MedicalRecord;
 import com.safetynet.alerts.model.Person;
-import com.safetynet.alerts.model.PersonCoverage;
-import com.safetynet.alerts.model.PersonFire;
-import com.safetynet.alerts.model.PersonFlood;
-import com.safetynet.alerts.model.PersonInfo;
-import com.safetynet.alerts.model.PhoneAlert;
+import com.safetynet.alerts.model.PersonCoverageDTO;
+import com.safetynet.alerts.model.PersonFireDTO;
+import com.safetynet.alerts.model.PersonFloodDTO;
+import com.safetynet.alerts.model.PersonInfoDTO;
+import com.safetynet.alerts.model.PhoneAlertDTO;
 import com.safetynet.alerts.repository.FireStationRepository;
 import com.safetynet.alerts.repository.MedicalRecordRepository;
 import com.safetynet.alerts.repository.PersonRepository;
@@ -55,9 +55,9 @@ public class AlertsService {
 	 *         informations
 	 * @throws Exception
 	 */
-	public List<FireStationCoverage> getFireStationCoverage(Integer fireStationNumber) throws Exception {
+	public List<FireStationCoverageDTO> getFireStationCoverage(Integer fireStationNumber) throws Exception {
 
-		List<FireStationCoverage> fireStationCoverages = new ArrayList<>();
+		List<FireStationCoverageDTO> fireStationCoverageDTOs = new ArrayList<>();
 		int[] totalNumAdults = { 0 }; // Using an array container for the sum of adults
 		int[] totalNumChildren = { 0 }; // Using an array container for the sum of children
 
@@ -83,27 +83,27 @@ public class AlertsService {
 				totalNumAdults[0] += numAdults; // Adding the number of adults to the total sum
 				totalNumChildren[0] += numChildren; // Adding the number of children to the total sum
 
-				List<PersonCoverage> personCoverages = personsCovered.stream()
-						.map(person -> new PersonCoverage(person.getFirstName(), person.getLastName(),
+				List<PersonCoverageDTO> personCoverageDTOs = personsCovered.stream()
+						.map(person -> new PersonCoverageDTO(person.getFirstName(), person.getLastName(),
 								person.getAddress(), person.getPhone()))
 						.collect(Collectors.toList());
 
-				FireStationCoverage fireStationCoverage = new FireStationCoverage(address, numAdults, numChildren,
-						personCoverages);
-				fireStationCoverage.setAddress(address);
-				fireStationCoverage.setNumAdults(numAdults);
-				fireStationCoverage.setNumChildren(numChildren);
-				fireStationCoverage.setPersons(personCoverages);
+				FireStationCoverageDTO fireStationCoverageDTO = new FireStationCoverageDTO(address, numAdults, numChildren,
+						personCoverageDTOs);
+				fireStationCoverageDTO.setAddress(address);
+				fireStationCoverageDTO.setNumAdults(numAdults);
+				fireStationCoverageDTO.setNumChildren(numChildren);
+				fireStationCoverageDTO.setPersons(personCoverageDTOs);
 
-				fireStationCoverages.add(fireStationCoverage);
+				fireStationCoverageDTOs.add(fireStationCoverageDTO);
 			});
 
 			if (totalNumAdults[0] == 0 || totalNumChildren[0] == 0) {
 			    return null;
 			}
 
-			// Adding an additional FireStationCoverage with the total sum for all addresses
-			fireStationCoverages.add(new FireStationCoverage("Zone désservie", totalNumAdults[0], totalNumChildren[0],
+			// Adding an additional FireStationCoverageDTO with the total sum for all addresses
+			fireStationCoverageDTOs.add(new FireStationCoverageDTO("Zone désservie", totalNumAdults[0], totalNumChildren[0],
 					new ArrayList<>()));
 
 			// Logging successful responses at Info level
@@ -114,7 +114,7 @@ public class AlertsService {
 			throw new Exception("Une erreur s'est produite lors de la récupération des informations.");
 		}
 
-		return fireStationCoverages;
+		return fireStationCoverageDTOs;
 	}
 	
 	/**
@@ -122,13 +122,13 @@ public class AlertsService {
 	 * du foyer.
 	 *
 	 * @param address l'adresse pour laquelle récupérer les informations
-	 * @return un objet ChildAlert contenant la liste des enfants et les membres du
+	 * @return un objet ChildAlertDTO contenant la liste des enfants et les membres du
 	 *         foyer
 	 * @throws Exception si une erreur se produit lors de la récupération des
 	 *                   informations
 	 */
-	public ChildAlert getChildAlert(String address) throws Exception {
-		List<Child> children = new ArrayList<>();
+	public ChildAlertDTO getChildAlert(String address) throws Exception {
+		List<ChildDTO> children = new ArrayList<>();
 		List<Person> householdMembers = new ArrayList<>();
 		boolean addressFound = false; // Boolean pour suivre si l'adresse a été trouvée
 
@@ -143,8 +143,8 @@ public class AlertsService {
 					int age = calculateAge(medicalRecord.getBirthdate());
 
 					if (age <= 18) {
-						Child child = new Child(person.getFirstName(), person.getLastName(), age);
-						children.add(child);
+						ChildDTO childDTO = new ChildDTO(person.getFirstName(), person.getLastName(), age);
+						children.add(childDTO);
 					} else {
 						householdMembers.add(person);
 					}
@@ -163,7 +163,7 @@ public class AlertsService {
 			return null;
 		}
 
-		return new ChildAlert(children, householdMembers);
+		return new ChildAlertDTO(children, householdMembers);
 	}
 	
 	/**
@@ -171,10 +171,10 @@ public class AlertsService {
 	 * caserne de pompiers spécifiée.
 	 *
 	 * @param fireStationNumber le numéro de la caserne de pompiers
-	 * @return une instance de PhoneAlert contenant les numéros de téléphone
+	 * @return une instance de PhoneAlertDTO contenant les numéros de téléphone
 	 * @throws Exception
 	 */
-	public PhoneAlert getPhoneAlert(int fireStationNumber) throws Exception {
+	public PhoneAlertDTO getPhoneAlert(int fireStationNumber) throws Exception {
 		try {
 			List<FireStation> fireStations = fireStationRepository.getFireStationByStation(fireStationNumber);
 			List<String> phoneNumbers = new ArrayList<>();
@@ -188,12 +188,12 @@ public class AlertsService {
 				}
 			}
 
-			PhoneAlert phoneAlert = new PhoneAlert();
-			phoneAlert.setPhoneNumbers(phoneNumbers);
+			PhoneAlertDTO phoneAlertDTO = new PhoneAlertDTO();
+			phoneAlertDTO.setPhoneNumbers(phoneNumbers);
 
 			logger.info(
 					"Numéros de téléphone récupérés avec succès pour la caserne de pompiers n° : " + fireStationNumber);
-			return phoneAlert;
+			return phoneAlertDTO;
 		} catch (Exception e) {
 			logger.error("Erreur lors de la récupération des numéros de téléphone pour la caserne de pompiers n° : "
 					+ fireStationNumber, e);
@@ -206,11 +206,11 @@ public class AlertsService {
 	 * spécifiée.
 	 *
 	 * @param address l'adresse où l'incendie s'est produit
-	 * @return une instance de Fire contenant les informations sur les personnes et
+	 * @return une instance de FireDTO contenant les informations sur les personnes et
 	 *         la caserne de pompiers
 	 * @throws Exception
 	 */
-	public Fire getFireInformation(String address) throws Exception {
+	public FireDTO getFireInformation(String address) throws Exception {
 		try {
 			// Rechercher les personnes associées à l'adresse spécifiée
 			List<Person> persons = personRepository.getPersonByAddress(address);
@@ -224,27 +224,27 @@ public class AlertsService {
 				return null;
 			}
 
-			// Créer une liste de PersonFire pour stocker les informations sur les personnes
-			List<PersonFire> personFires = persons.stream().map(person -> {
+			// Créer une liste de PersonFireDTO pour stocker les informations sur les personnes
+			List<PersonFireDTO> personFireDTOs = persons.stream().map(person -> {
 				// Récupérer le dossier médical de la personne
 				MedicalRecord medicalRecord = medicalRecordRepository.getMedicalRecordByFullName(person.getFirstName(),
 						person.getLastName());
 
-				// Créer un nouvel objet PersonFire pour stocker les informations sur la
+				// Créer un nouvel objet PersonFireDTO pour stocker les informations sur la
 				// personne
 				int age = calculateAge(medicalRecord.getBirthdate());
-				PersonFire personFire = new PersonFire(person.getFirstName(), person.getLastName(), person.getPhone(),
+				PersonFireDTO personFireDTO = new PersonFireDTO(person.getFirstName(), person.getLastName(), person.getPhone(),
 						age, medicalRecord.getMedications(), medicalRecord.getAllergies());
 
-				return personFire;
+				return personFireDTO;
 			}).collect(Collectors.toList());
 
-			// Créer un objet Fire avec la liste de PersonFire et le numéro de la caserne de
+			// Créer un objet FireDTO avec la liste de PersonFireDTO et le numéro de la caserne de
 			// pompiers
-			Fire fire = new Fire(personFires, fireStation.getStation());
+			FireDTO fireDTO = new FireDTO(personFireDTOs, fireStation.getStation());
 
 			logger.info("Informations sur l'incendie récupérées avec succès pour l'adresse : " + address);
-			return fire;
+			return fireDTO;
 		} catch (Exception e) {
 			logger.error("Erreur lors de la récupération des informations sur l'incendie pour l'adresse : " + address,
 					e);
@@ -258,13 +258,13 @@ public class AlertsService {
 	 * informations des habitants correspondants.
 	 *
 	 * @param stationNumbers La liste des numéros de caserne.
-	 * @return Liste de Flood contenant les adresses et les informations des
+	 * @return Liste de FloodDTO contenant les adresses et les informations des
 	 *         habitants.
 	 * @throws Exception
 	 */
-	public List<Flood> getFloodStations(Integer stationNumber) throws Exception {
+	public List<FloodDTO> getFloodStations(Integer stationNumber) throws Exception {
 
-		List<Flood> floodStations = new ArrayList<>();
+		List<FloodDTO> floodStations = new ArrayList<>();
 
 		try {
 			// Trouver toutes les adresses correspondant au numéro de station donné
@@ -278,7 +278,7 @@ public class AlertsService {
 
 			// Parcourir chaque adresse et trouver les personnes correspondantes
 			for (String address : addresses) {
-				List<PersonFlood> persons = personRepository.getAllPersons().stream()
+				List<PersonFloodDTO> persons = personRepository.getAllPersons().stream()
 						.filter(person -> person.getAddress().equals(address)).map(person -> {
 							MedicalRecord medicalRecord = medicalRecordRepository
 									.getMedicalRecordByFullName(person.getFirstName(), person.getLastName());
@@ -286,12 +286,12 @@ public class AlertsService {
 							List<String> allergies = medicalRecord.getAllergies();
 							int age = calculateAge(medicalRecord.getBirthdate());
 
-							return new PersonFlood(person.getFirstName(), person.getLastName(), person.getPhone(), age,
+							return new PersonFloodDTO(person.getFirstName(), person.getLastName(), person.getPhone(), age,
 									medications, allergies);
 						}).collect(Collectors.toList());
 
-				Flood flood = new Flood(address, persons);
-				floodStations.add(flood);
+				FloodDTO floodDTO = new FloodDTO(address, persons);
+				floodStations.add(floodDTO);
 			}
 
 			// Journal des réponses réussies au niveau Info
@@ -311,16 +311,16 @@ public class AlertsService {
 	 *
 	 * @param firstName le prénom de la personne
 	 * @param lastName  le nom de la personne
-	 * @return une liste d'objets PersonInfo contenant les informations demandées
+	 * @return une liste d'objets PersonInfoDTO contenant les informations demandées
 	 */
-	public List<PersonInfo> getPersonInfo(String firstName, String lastName) {
+	public List<PersonInfoDTO> getPersonInfoDTO(String firstName, String lastName) {
 		logger.info("Recherche des informations pour la personne : " + firstName + " " + lastName);
 
 		try {
 			// Récupérer toutes les personnes depuis le référentiel
 			List<Person> persons = personRepository.getAllPersons();
 
-			List<PersonInfo> personInfos = persons.stream()
+			List<PersonInfoDTO> personInfoDTOs = persons.stream()
 					.filter(person -> person.getFirstName().equals(firstName) && person.getLastName().equals(lastName))
 					.map(person -> {
 						// Récupérer le dossier médical de la personne
@@ -329,22 +329,22 @@ public class AlertsService {
 
 						if (medicalRecord != null) {
 							// Créer un objet PersonMedicalInfo avec les informations de base de la personne
-							InfoPerson infoPerson = new InfoPerson(person.getFirstName(), person.getLastName(),
+							InfoPersonDTO infoPersonDTO = new InfoPersonDTO(person.getFirstName(), person.getLastName(),
 									person.getAddress(), person.getEmail());
 
 							// Calculer l'âge de la personne
 							int age = calculateAge(medicalRecord.getBirthdate());
 
-							// Créer un objet PersonInfo avec les informations de la personne et le
+							// Créer un objet PersonInfoDTO avec les informations de la personne et le
 							// dossier médical
-							return new PersonInfo(infoPerson, age, medicalRecord.getMedications(),
+							return new PersonInfoDTO(infoPersonDTO, age, medicalRecord.getMedications(),
 									medicalRecord.getAllergies());
 						}
 						return null;
-					}).filter(personInfo -> personInfo != null).collect(Collectors.toList());
+					}).filter(personInfoDTO -> personInfoDTO != null).collect(Collectors.toList());
 
 			logger.info("Informations récupérées avec succès pour la personne : " + firstName + " " + lastName);
-			return personInfos;
+			return personInfoDTOs;
 		} catch (Exception e) {
 			logger.error(
 					"Erreur lors de la récupération des informations pour la personne : " + firstName + " " + lastName,
@@ -358,11 +358,11 @@ public class AlertsService {
 	 * Récupère les adresses e-mail des membres d'une communauté basée sur la ville.
 	 *
 	 * @param city la ville de la communauté
-	 * @return CommunityEmail contenant les adresses e-mail des membres de la
+	 * @return CommunityEmailDTO contenant les adresses e-mail des membres de la
 	 *         communauté
 	 * @throws IllegalArgumentException si la ville est nulle ou vide
 	 */
-	public CommunityEmail getCommunityEmails(String city) throws IllegalArgumentException {
+	public CommunityEmailDTO getCommunityEmails(String city) throws IllegalArgumentException {
 
 		List<Person> persons;
 		try {
@@ -380,12 +380,12 @@ public class AlertsService {
 
 		List<String> emails = persons.stream().map(Person::getEmail).collect(Collectors.toList());
 
-		CommunityEmail communityEmail = new CommunityEmail();
-		communityEmail.setEmails(emails);
+		CommunityEmailDTO communityEmailDTO = new CommunityEmailDTO();
+		communityEmailDTO.setEmails(emails);
 
 		logger.info("Adresses e-mail récupérées avec succès pour la ville : " + city);
 
-		return communityEmail;
+		return communityEmailDTO;
 	}
 	
 	/**

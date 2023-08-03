@@ -2,7 +2,6 @@ package com.safetynet.alerts.controller;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.safetynet.alerts.model.CommunityEmail;
+import com.safetynet.alerts.model.CommunityEmailDTO;
 import com.safetynet.alerts.service.AlertsService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,7 +28,6 @@ public class CommunityEmailController {
 
 	private AlertsService alertsService;
 
-	@Autowired
 	public CommunityEmailController(AlertsService alertsService) {
 		this.alertsService = alertsService;
 	}
@@ -37,23 +35,22 @@ public class CommunityEmailController {
 	@GetMapping
 	@Operation(summary = "Get community emails by city")
 	@ApiResponses({ @ApiResponse(responseCode = "200", description = "Success", content = {
-			@Content(schema = @Schema(implementation = CommunityEmail.class), mediaType = "application/json") }),
+			@Content(schema = @Schema(implementation = CommunityEmailDTO.class), mediaType = "application/json") }),
 			@ApiResponse(responseCode = "400", description = "Bad Request"),
 			@ApiResponse(responseCode = "404", description = "City not found") })
-	public ResponseEntity<CommunityEmail> getCommunityEmails(@RequestParam("city") String city) {
+	public ResponseEntity<CommunityEmailDTO> getCommunityEmails(@RequestParam("city") String city) {
 		
 			if (city == null || city.isEmpty()) {
 				logger.error("La ville est nul ou vide.");
 				return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 			}
 
-			CommunityEmail communityEmail = alertsService.getCommunityEmails(city);
-			if (communityEmail == null) {
+			CommunityEmailDTO communityEmailDTO = alertsService.getCommunityEmails(city);
+			if (communityEmailDTO == null) {
 				logger.error("La ville n'est pas trouvée.");
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
-			logger.info("La méthode getCommunityEmails a été exécutée avec succès.");
-			return new ResponseEntity<>(communityEmail, HttpStatus.OK);
+			return new ResponseEntity<>(communityEmailDTO, HttpStatus.OK);
 
 	}
 }

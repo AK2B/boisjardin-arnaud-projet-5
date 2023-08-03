@@ -9,14 +9,14 @@ import lombok.Data;
  * de pompier.
  */
 @Data
-public class FireStationCoverage {
+public class FireStationCoverageDTO {
 
 	private String address;
 	private int numAdults;
 	private int numChildren;
-	private List<PersonCoverage> persons;
+	private List<PersonCoverageDTO> persons;
 
-	public FireStationCoverage(String address, int numAdults, int numChildren, List<PersonCoverage> persons) {
+	public FireStationCoverageDTO(String address, int numAdults, int numChildren, List<PersonCoverageDTO> persons) {
 		super();
 		this.address = address;
 		this.numAdults = numAdults;

@@ -1,23 +1,21 @@
 package com.safetynet.alerts.model;
 
 import lombok.Data;
+
 /**
- * Classe représentant une liste de personne, composition de coverage.
+ * Classe représentant une liste de personnes, composition de personne info.
  */
 @Data
-public class PersonCoverage {
-	
+public class InfoPersonDTO {
     private String firstName;
     private String lastName;
     private String address;
-    private String phone;
+    private String email;
 
-    public PersonCoverage(String firstName, String lastName, String address, String phone) {
+    public InfoPersonDTO(String firstName, String lastName, String address, String email) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
-        this.phone = phone;
+        this.email = email;
     }
-
-    
 }

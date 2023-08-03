@@ -22,10 +22,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import com.safetynet.alerts.controller.FireController;
-import com.safetynet.alerts.model.Fire;
+import com.safetynet.alerts.model.FireDTO;
 import com.safetynet.alerts.model.FireStation;
 import com.safetynet.alerts.model.Person;
-import com.safetynet.alerts.model.PersonFire;
+import com.safetynet.alerts.model.PersonFireDTO;
 import com.safetynet.alerts.service.AlertsService;
 
 @WebMvcTest (controllers = { FireController.class, AlertsService.class })
@@ -49,28 +49,28 @@ public class FireControllerTest {
         // Créer un objet FireStation pour l'adresse
         FireStation fireStation = new FireStation(address, 3);
 
-        // Créer une liste de PersonFire
-        List<PersonFire> personFires = new ArrayList<>();
-        personFires.add(new PersonFire("John", "Boyd", "841-874-6512", 39, Arrays.asList("aznol:350mg","hydrapermazol:100mg"), Arrays.asList("nillacilan")));
+        // Créer une liste de PersonFireDTO
+        List<PersonFireDTO> personFireDTOs = new ArrayList<>();
+        personFireDTOs.add(new PersonFireDTO("John", "Boyd", "841-874-6512", 39, Arrays.asList("aznol:350mg","hydrapermazol:100mg"), Arrays.asList("nillacilan")));
 
-        // Créer un objet Fire avec la liste de PersonFire et le numéro de la caserne de pompiers
-        Fire fire = new Fire(personFires, fireStation.getStation());
+        // Créer un objet FireDTO avec la liste de PersonFireDTO et le numéro de la caserne de pompiers
+        FireDTO fireDTO = new FireDTO(personFireDTOs, fireStation.getStation());
 
         // Définir le comportement du service de l'application mocké
-        when(alertsService.getFireInformation(address)).thenReturn(fire);
+        when(alertsService.getFireInformation(address)).thenReturn(fireDTO);
 
         // Exécuter la requête GET pour obtenir les détails de l'incendie
         mockMvc.perform(MockMvcRequestBuilders.get("/fire")
                 .param("address", address)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.personFires[0].firstName").value("John"))
-                .andExpect(jsonPath("$.personFires[0].lastName").value("Boyd"))
-                .andExpect(jsonPath("$.personFires[0].phone").value("841-874-6512"))
-                .andExpect(jsonPath("$.personFires[0].age").value("39"))
-                .andExpect(jsonPath("$.personFires[0].medications[0]").value("aznol:350mg"))
-                .andExpect(jsonPath("$.personFires[0].medications[1]").value("hydrapermazol:100mg"))
-                .andExpect(jsonPath("$.personFires[0].allergies[0]").value("nillacilan"))
+                .andExpect(jsonPath("$.personFireDTOs[0].firstName").value("John"))
+                .andExpect(jsonPath("$.personFireDTOs[0].lastName").value("Boyd"))
+                .andExpect(jsonPath("$.personFireDTOs[0].phone").value("841-874-6512"))
+                .andExpect(jsonPath("$.personFireDTOs[0].age").value("39"))
+                .andExpect(jsonPath("$.personFireDTOs[0].medications[0]").value("aznol:350mg"))
+                .andExpect(jsonPath("$.personFireDTOs[0].medications[1]").value("hydrapermazol:100mg"))
+                .andExpect(jsonPath("$.personFireDTOs[0].allergies[0]").value("nillacilan"))
                 .andExpect(jsonPath("$.fireStationNumber").value("3"));
         
 		verify(alertsService, times(1)).getFireInformation(address);

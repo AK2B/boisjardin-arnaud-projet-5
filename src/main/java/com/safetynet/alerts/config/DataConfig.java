@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Repository;
@@ -42,7 +41,6 @@ public class DataConfig {
 	 *                       JSON.
 	 * @param objectMapper   ObjectMapper, pour désérialiser les données JSON.
 	 */
-	@Autowired
 	public DataConfig(ResourceLoader resourceLoader, ObjectMapper objectMapper) {
 		this.resourceLoader = resourceLoader;
 		this.objectMapper = objectMapper;
